@@ -1,11 +1,61 @@
 import React, { useState, useRef } from 'react';
-import { Database, Download, Upload, Trash2, Sparkles, X } from 'lucide-react';
-import { exportDataAsJSON, importDataFromJSON, clearAllData, generateDemoData } from '../services/storage';
+import { 
+  Database, 
+  Download, 
+  Upload, 
+  Trash2, 
+  Sparkles, 
+  X, 
+  Cloud, 
+  RefreshCw 
+} from 'lucide-react';
+import { 
+  exportDataAsJSON, 
+  importDataFromJSON, 
+  clearAllData, 
+  generateDemoData,
+  fetchServerData,
+  syncAllToServer,
+  saveStoredData,
+  STORAGE_KEYS
+} from '../services/storage';
 
 export default function Navbar({ onDataUpdated }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [message, setMessage] = useState(null);
+  const [isSyncing, setIsSyncing] = useState(false);
   const fileInputRef = useRef(null);
+
+  const handleManualSync = async () => {
+    setIsSyncing(true);
+    try {
+      // 1. Fetch server data
+      const serverData = await fetchServerData();
+      if (serverData) {
+        if (serverData.sales?.length || serverData.expenses?.length || serverData.batches?.length) {
+          saveStoredData(STORAGE_KEYS.SALES, serverData.sales || []);
+          saveStoredData(STORAGE_KEYS.EXPENSES, serverData.expenses || []);
+          saveStoredData(STORAGE_KEYS.BATCHES, serverData.batches || []);
+          if (onDataUpdated) onDataUpdated();
+          showNotice('✅ Data berhasil disinkronkan dari server!');
+        } else {
+          // Server empty, upload local data
+          const pushRes = await syncAllToServer({});
+          if (pushRes.success) {
+            showNotice('✅ Data lokal berhasil diunggah ke database server!');
+          } else {
+            showNotice('⚠️ Server terhubung tapi gagal menyimpan.', true);
+          }
+        }
+      } else {
+        showNotice('⚠️ Tidak dapat terhubung ke /api/data server.', true);
+      }
+    } catch (err) {
+      showNotice('Gagal sinkron: ' + err.message, true);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   const handleExport = () => {
     const jsonStr = exportDataAsJSON();
@@ -129,8 +179,33 @@ export default function Navbar({ onDataUpdated }) {
             </div>
 
             <div className="p-5 space-y-3">
+              {/* Cloud Server Sync Button (Solusi Pindah Device Data Hilang) */}
+              <div className="p-3.5 bg-emerald-50 border-2 border-emerald-400 rounded-2xl space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs font-black text-emerald-950">
+                    <Cloud className="w-4 h-4 text-emerald-700" />
+                    <span>Sinkronisasi Cloud Server</span>
+                  </div>
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900">
+                    Antar Device
+                  </span>
+                </div>
+                <p className="text-[11px] text-emerald-800 font-medium leading-relaxed">
+                  Gunakan tombol ini agar data yang Anda input di HP langsung tersimpan di server dan otomatis muncul saat dibuka di laptop / HP lain.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleManualSync}
+                  disabled={isSyncing}
+                  className="w-full min-h-[42px] py-2.5 px-3 rounded-xl bg-emerald-700 active:bg-emerald-800 text-white font-black text-xs flex items-center justify-center gap-2 active:scale-95 shadow-md shadow-emerald-700/20 transition-all"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+                  <span>{isSyncing ? 'Menghubungi Server...' : '⚡ Sinkronkan Data Sekarang'}</span>
+                </button>
+              </div>
+
               <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                Data disimpan aman di browser HP secara offline. Lakukan backup berkala ke file JSON agar aman saat ganti HP.
+                Selain tersimpan di server, data juga dicadangkan di memori lokal. Anda juga bisa mengunduh file cadangan mandiri:
               </p>
 
               {/* Download Backup */}

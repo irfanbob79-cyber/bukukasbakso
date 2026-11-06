@@ -244,3 +244,4 @@ export default function EditSaleModal({ isOpen, sale, onClose, onSave }) {
     </div>
   );
 }
+

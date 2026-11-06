@@ -10,7 +10,9 @@ import ReportsView from './views/ReportsView';
 import { 
   getStoredData, 
   saveStoredData, 
-  STORAGE_KEYS
+  STORAGE_KEYS,
+  fetchServerData,
+  syncAllToServer
 } from './services/storage';
 
 export default function App() {
@@ -64,6 +66,41 @@ export default function App() {
 
   useEffect(() => {
     reloadData();
+
+    // Cross-device sync on app launch
+    const syncInit = async () => {
+      try {
+        const serverData = await fetchServerData();
+        if (serverData) {
+          const hasServerData = Boolean(
+            (serverData.sales && serverData.sales.length > 0) ||
+            (serverData.expenses && serverData.expenses.length > 0) ||
+            (serverData.batches && serverData.batches.length > 0)
+          );
+
+          if (hasServerData) {
+            setSales(serverData.sales || []);
+            setExpenses(serverData.expenses || []);
+            setBatches(serverData.batches || []);
+            saveStoredData(STORAGE_KEYS.SALES, serverData.sales || []);
+            saveStoredData(STORAGE_KEYS.EXPENSES, serverData.expenses || []);
+            saveStoredData(STORAGE_KEYS.BATCHES, serverData.batches || []);
+          } else {
+            // Server DB is empty, push local data if local has data
+            const localSales = getStoredData(STORAGE_KEYS.SALES, []);
+            const localExpenses = getStoredData(STORAGE_KEYS.EXPENSES, []);
+            const localBatches = getStoredData(STORAGE_KEYS.BATCHES, []);
+            if (localSales.length > 0 || localExpenses.length > 0 || localBatches.length > 0) {
+              syncAllToServer({ sales: localSales, expenses: localExpenses, batches: localBatches });
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Background cloud sync offline or waiting for backend.');
+      }
+    };
+
+    syncInit();
   }, []);
 
   // Handlers for Sales
@@ -72,6 +109,7 @@ export default function App() {
     const newSales = [...updated, saleData];
     setSales(newSales);
     saveStoredData(STORAGE_KEYS.SALES, newSales);
+    syncAllToServer({ sales: newSales, expenses, batches });
   };
 
   const handleUpdateSale = (updatedSale) => {
@@ -79,12 +117,14 @@ export default function App() {
     const newSales = [...filtered, updatedSale];
     setSales(newSales);
     saveStoredData(STORAGE_KEYS.SALES, newSales);
+    syncAllToServer({ sales: newSales, expenses, batches });
   };
 
   const handleDeleteSale = (saleId) => {
     const newSales = (sales || []).filter((s) => s.id !== saleId);
     setSales(newSales);
     saveStoredData(STORAGE_KEYS.SALES, newSales);
+    syncAllToServer({ sales: newSales, expenses, batches });
   };
 
   // Handlers for Expenses
@@ -92,18 +132,21 @@ export default function App() {
     const updated = [...(expenses || []), ...newExpenses];
     setExpenses(updated);
     saveStoredData(STORAGE_KEYS.EXPENSES, updated);
+    syncAllToServer({ sales, expenses: updated, batches });
   };
 
   const handleUpdateExpense = (updatedExpense) => {
     const updated = (expenses || []).map((e) => e.id === updatedExpense.id ? updatedExpense : e);
     setExpenses(updated);
     saveStoredData(STORAGE_KEYS.EXPENSES, updated);
+    syncAllToServer({ sales, expenses: updated, batches });
   };
 
   const handleDeleteExpense = (expenseId) => {
     const updated = (expenses || []).filter((e) => e.id !== expenseId);
     setExpenses(updated);
     saveStoredData(STORAGE_KEYS.EXPENSES, updated);
+    syncAllToServer({ sales, expenses: updated, batches });
   };
 
   // Handlers for Dough Batches
@@ -111,12 +154,14 @@ export default function App() {
     const updated = [...(batches || []), newBatch];
     setBatches(updated);
     saveStoredData(STORAGE_KEYS.BATCHES, updated);
+    syncAllToServer({ sales, expenses, batches: updated });
   };
 
   const handleUpdateBatch = (updatedBatch) => {
     const updated = (batches || []).map((b) => b.id === updatedBatch.id ? updatedBatch : b);
     setBatches(updated);
     saveStoredData(STORAGE_KEYS.BATCHES, updated);
+    syncAllToServer({ sales, expenses, batches: updated });
   };
 
   const handleToggleBatchStatus = (batchId) => {
@@ -125,12 +170,14 @@ export default function App() {
     );
     setBatches(updated);
     saveStoredData(STORAGE_KEYS.BATCHES, updated);
+    syncAllToServer({ sales, expenses, batches: updated });
   };
 
   const handleDeleteBatch = (batchId) => {
     const updated = (batches || []).filter((b) => b.id !== batchId);
     setBatches(updated);
     saveStoredData(STORAGE_KEYS.BATCHES, updated);
+    syncAllToServer({ sales, expenses, batches: updated });
   };
 
   const isHistoryOrReports = activeTab === 'history' || activeTab === 'reports';

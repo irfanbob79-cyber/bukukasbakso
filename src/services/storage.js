@@ -41,6 +41,46 @@ export const saveStoredData = (key, data) => {
   }
 };
 
+// Automatic Server Cloud Sync (Cross-Device)
+export const fetchServerData = async () => {
+  try {
+    const res = await fetch('/api/data', { cache: 'no-store' });
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (json.success && json.data) {
+      return json.data;
+    }
+    return null;
+  } catch (e) {
+    // Offline or server API not yet enabled on Nginx
+    return null;
+  }
+};
+
+export const syncAllToServer = async ({ sales, expenses, batches }) => {
+  try {
+    const payload = {
+      sales: Array.isArray(sales) ? sales : getStoredData(STORAGE_KEYS.SALES, []),
+      expenses: Array.isArray(expenses) ? expenses : getStoredData(STORAGE_KEYS.EXPENSES, []),
+      batches: Array.isArray(batches) ? batches : getStoredData(STORAGE_KEYS.BATCHES, []),
+      last_updated: new Date().toISOString()
+    };
+
+    const res = await fetch('/api/data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      return { success: true };
+    }
+    return { success: false };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+};
+
 // Sample realistic dummy data for previewing the app
 export const generateDemoData = () => {
   const today = new Date();

@@ -30,6 +30,10 @@ dist-ssr
 .env.local
 .env.*.local
 
+# Database data folder
+data/
+*.db
+
 # Agent/Temp files
 .gemini
 *.tmp

@@ -541,6 +541,36 @@ export default function HistoryView({
                   <p className="text-xs text-slate-600 italic font-medium">"{b.notes}"</p>
                 )}
 
+                {/* Yield Breakdown (Hasil Cetak Bakso & Estimasi Omzet) */}
+                {b.yield_items && b.yield_items.length > 0 && (
+                  <div className="bg-amber-100/60 p-2.5 rounded-xl border border-amber-200 space-y-1.5 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="font-extrabold text-amber-950">
+                        🍢 Hasil Cetak ({b.total_yield_balls || b.yield_items.reduce((s, y) => s + (y.qty || 0), 0)} butir):
+                      </span>
+                      <span className="font-black text-amber-900 text-xs">
+                        Potensi: {formatRupiah(b.total_projected_revenue || 0)}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {b.yield_items.map((y, idx) => (
+                        <span key={idx} className="px-2 py-0.5 rounded bg-white border border-amber-200 text-[10px] font-bold text-slate-800 shadow-2xs">
+                          {y.name}: {y.qty} btr {y.price_per_unit ? `@${formatRupiah(y.price_per_unit)}` : ''}
+                        </span>
+                      ))}
+                    </div>
+                    {b.projected_profit !== undefined && (
+                      <div className="text-[10px] font-bold text-emerald-800 pt-0.5 flex items-center justify-between">
+                        <span>Estimasi Untung Kotor:</span>
+                        <span className="font-black text-emerald-700">
+                          {b.projected_profit >= 0 ? `+${formatRupiah(b.projected_profit)}` : formatRupiah(b.projected_profit)}
+                          {b.profit_margin_percent ? ` (${b.profit_margin_percent}%)` : ''}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <button

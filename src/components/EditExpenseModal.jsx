@@ -223,3 +223,4 @@ export default function EditExpenseModal({ isOpen, expense, onClose, onSave }) {
     </div>
   );
 }
+

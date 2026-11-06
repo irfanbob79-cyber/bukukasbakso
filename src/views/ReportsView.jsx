@@ -15,6 +15,7 @@ import {
   formatDateIndonesian, 
   formatShortDate 
 } from '../utils/formatters';
+import IndonesianDatePicker from '../components/IndonesianDatePicker';
 
 export default function ReportsView({ sales, expenses, batches }) {
   const today = getTodayDateString();
@@ -228,20 +229,22 @@ export default function ReportsView({ sales, expenses, batches }) {
           <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100">
             <div>
               <span className="text-[10px] font-bold text-slate-500 uppercase block mb-0.5">Dari:</span>
-              <input
-                type="date"
+              <IndonesianDatePicker
+                id="report-start-date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-xs font-bold"
+                onChange={setStartDate}
+                size="compact"
+                accentColor="emerald"
               />
             </div>
             <div>
               <span className="text-[10px] font-bold text-slate-500 uppercase block mb-0.5">Sampai:</span>
-              <input
-                type="date"
+              <IndonesianDatePicker
+                id="report-end-date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-xs font-bold"
+                onChange={setEndDate}
+                size="compact"
+                accentColor="emerald"
               />
             </div>
           </div>

@@ -10,6 +10,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import CurrencyInput from '../components/CurrencyInput';
+import IndonesianDatePicker from '../components/IndonesianDatePicker';
 import { 
   formatRupiah, 
   getTodayDateString, 
@@ -149,17 +150,14 @@ export default function ExpensesView({ onSaveExpenses, setActiveTab }) {
 
       {/* Input Form with Multi-Row Entry */}
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3.5">
-        {/* Date */}
+        {/* Date (Format Indonesia: Day-Month-Year) */}
         <div>
-          <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1">
-            Tanggal Belanja
-          </label>
-          <input
-            type="date"
+          <IndonesianDatePicker
+            id="expense-date"
+            label="Tanggal Belanja (Hari-Bulan-Tahun)"
             value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="w-full px-3 py-2 rounded-xl border border-slate-300 font-black text-slate-800 text-sm focus:border-rose-600 outline-none"
-            required
+            onChange={setDate}
+            accentColor="rose"
           />
         </div>
 

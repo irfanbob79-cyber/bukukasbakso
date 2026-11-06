@@ -12,6 +12,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import CurrencyInput from '../components/CurrencyInput';
+import IndonesianDatePicker from '../components/IndonesianDatePicker';
 import { 
   formatRupiah, 
   getTodayDateString, 
@@ -168,15 +169,12 @@ export default function DoughBatchView({ batches, onSaveBatch, onToggleBatchStat
         {/* Date and Estimated Days */}
         <div className="space-y-2.5">
           <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1">
-              Tanggal Pembuatan / Giling
-            </label>
-            <input
-              type="date"
+            <IndonesianDatePicker
+              id="batch-grind-date"
+              label="Tanggal Pembuatan / Giling (Hari-Bulan-Tahun)"
               value={grindDate}
-              onChange={(e) => setGrindDate(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-slate-300 font-black text-slate-800 text-sm focus:border-amber-600 outline-none"
-              required
+              onChange={setGrindDate}
+              accentColor="amber"
             />
           </div>
 

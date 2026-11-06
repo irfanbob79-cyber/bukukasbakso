@@ -23,6 +23,7 @@ import {
   formatDateIndonesian, 
   formatShortDate 
 } from '../utils/formatters';
+import IndonesianDatePicker from '../components/IndonesianDatePicker';
 
 export default function HistoryView({
   sales,
@@ -251,14 +252,15 @@ export default function HistoryView({
           </button>
 
           <div className="flex-1">
-            <input
-              type="date"
+            <IndonesianDatePicker
+              id="history-date-picker"
               value={selectedDate}
-              onChange={(e) => {
-                setSelectedDate(e.target.value);
+              onChange={(newDate) => {
+                setSelectedDate(newDate);
                 setDateMode('SPECIFIC');
               }}
-              className="w-full px-3 py-2 text-center bg-white rounded-xl border border-slate-300 text-xs font-black text-slate-800 outline-none focus:border-indigo-600"
+              size="compact"
+              accentColor="indigo"
             />
           </div>
 

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import CurrencyInput from '../components/CurrencyInput';
 import DenominationCalculatorModal from '../components/DenominationCalculatorModal';
+import IndonesianDatePicker from '../components/IndonesianDatePicker';
 import { 
   formatRupiah, 
   getTodayDateString, 
@@ -135,20 +136,17 @@ export default function SalesView({ sales, onSaveSale, setActiveTab }) {
 
       {/* Main Form */}
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3.5">
-        {/* Date Selector */}
+        {/* Date Selector (Format Indonesia: Day-Month-Year) */}
         <div>
-          <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1">
-            Tanggal Tutup Warung
-          </label>
-          <input
-            type="date"
+          <IndonesianDatePicker
+            id="sales-date"
+            label="Tanggal Tutup Warung (Hari-Bulan-Tahun)"
             value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-full px-3 py-2 rounded-xl border border-slate-300 font-black text-slate-800 focus:border-emerald-600 outline-none text-sm"
-            required
+            onChange={setSelectedDate}
+            accentColor="emerald"
           />
           {existingRecord && (
-            <p className="text-[11px] text-amber-700 mt-1 font-bold flex items-center gap-1">
+            <p className="text-[11px] text-amber-700 mt-1.5 font-bold flex items-center gap-1">
               <AlertCircle className="w-3.5 h-3.5 text-amber-600 inline" />
               Sudah ada data penjualan tanggal ini. Menyimpan akan memperbarui nilai lama.
             </p>

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍜</text></svg>" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#15803d" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="description" content="Aplikasi Pembukuan & Manajemen Kas Warung Bakso Mandiri - Cepat, Praktis, 100% Tunai" />
+    <title>Bakso Josjis - Pembukuan Warung Bakso</title>
+    <script>
+      // Global error listener to catch and display any JS error directly on screen
+      window.addEventListener('error', function(e) {
+        var el = document.getElementById('debug-error-box');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = 'debug-error-box';
+          el.style.cssText = 'position:fixed;inset:0;background:#0f172a;color:#f87171;padding:24px;font-family:sans-serif;z-index:9999999;overflow:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;';
+          document.body.appendChild(el);
+        }
+        var msg = e.error ? (e.error.stack || e.error.message) : (e.message || 'Unknown error');
+        el.innerHTML = '<div style="background:#1e293b;padding:20px;border-radius:16px;max-width:380px;width:100%;box-shadow:0 20px 25px -5px rgba(0,0,0,0.5);border:1px solid #ef4444;">' +
+          '<div style="font-size:28px;text-align:center;margin-bottom:8px;">⚠️</div>' +
+          '<h3 style="color:#ef4444;font-size:16px;font-weight:bold;text-align:center;margin:0 0 8px 0;">Terjadi Kendala JavaScript</h3>' +
+          '<pre style="background:#020617;padding:12px;border-radius:8px;color:#f1f5f9;font-size:11px;overflow-x:auto;white-space:pre-wrap;max-height:160px;margin:0 0 16px 0;">' + msg + '</pre>' +
+          '<button onclick="localStorage.clear();location.reload();" style="width:100%;background:#16a34a;color:white;font-weight:bold;padding:12px;border:none;border-radius:10px;cursor:pointer;font-size:13px;">🧹 Bersihkan Cache & Muat Ulang</button>' +
+          '</div>';
+      });
+    </script>
+  </head>
+  <body class="bg-slate-900 text-slate-800 antialiased selection:bg-emerald-500 selection:text-white">
+    <div id="root">
+      <!-- Loading indicator while React bundles load -->
+      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0f172a;color:white;font-family:sans-serif;text-align:center;padding:20px;">
+        <div>
+          <div style="font-size:48px;margin-bottom:12px;animation:pulse 1.5s infinite;">🍜</div>
+          <div style="font-size:18px;font-weight:900;letter-spacing:-0.5px;margin-bottom:6px;color:#34d399;">Bakso Josjis</div>
+          <div style="font-size:12px;color:#94a3b8;font-weight:500;">Menyiapkan buku kas warung...</div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

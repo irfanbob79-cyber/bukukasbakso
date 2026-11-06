@@ -1,11 +1,21 @@
 import { generateUUID, getTodayDateString } from '../utils/formatters';
 
 const STORAGE_KEYS = {
-  SALES: 'bakso_sales_v1',
-  EXPENSES: 'bakso_expenses_v1',
-  BATCHES: 'bakso_batches_v1',
-  SETTINGS: 'bakso_settings_v1',
+  SALES: 'bakso_sales_v2',
+  EXPENSES: 'bakso_expenses_v2',
+  BATCHES: 'bakso_batches_v2',
+  SETTINGS: 'bakso_settings_v2',
 };
+
+// Automatically purge legacy v1 test demo data from browser localStorage
+try {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.removeItem('bakso_sales_v1');
+    localStorage.removeItem('bakso_expenses_v1');
+    localStorage.removeItem('bakso_batches_v1');
+    localStorage.removeItem('bakso_settings_v1');
+  }
+} catch (e) {}
 
 // Safe LocalStorage helpers
 export const getStoredData = (key, fallback = []) => {
@@ -283,6 +293,10 @@ export const clearAllData = () => {
   localStorage.removeItem(STORAGE_KEYS.EXPENSES);
   localStorage.removeItem(STORAGE_KEYS.BATCHES);
   localStorage.removeItem(STORAGE_KEYS.SETTINGS);
+  localStorage.removeItem('bakso_sales_v1');
+  localStorage.removeItem('bakso_expenses_v1');
+  localStorage.removeItem('bakso_batches_v1');
+  localStorage.removeItem('bakso_settings_v1');
 };
 
 export { STORAGE_KEYS };

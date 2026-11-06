@@ -7,13 +7,16 @@ import {
   Sparkles, 
   CheckCircle,
   History,
-  ChevronRight
+  ChevronRight,
+  Edit3
 } from 'lucide-react';
 import CurrencyInput from '../components/CurrencyInput';
 import IndonesianDatePicker from '../components/IndonesianDatePicker';
+import EditExpenseModal from '../components/EditExpenseModal';
 import { 
   formatRupiah, 
   getTodayDateString, 
+  formatDateIndonesian,
   generateUUID 
 } from '../utils/formatters';
 
@@ -47,9 +50,16 @@ const PRESET_OPERATIONAL_ITEMS = [
   'Bensin motor belanja'
 ];
 
-export default function ExpensesView({ onSaveExpenses, setActiveTab }) {
+export default function ExpensesView({ 
+  expenses = [], 
+  onSaveExpenses, 
+  onUpdateExpense, 
+  onDeleteExpense, 
+  setActiveTab 
+}) {
   const [date, setDate] = useState(getTodayDateString());
   const [category, setCategory] = useState('MARKET'); // 'MARKET' | 'ICE' | 'OPERATIONAL'
+  const [editingExpense, setEditingExpense] = useState(null);
   
   // Multi-item rows for quick batch input
   const [items, setItems] = useState([
@@ -299,6 +309,88 @@ export default function ExpensesView({ onSaveExpenses, setActiveTab }) {
         </button>
       </form>
 
+      {/* Daftar Belanja Terbaru (Bisa Diedit / Dihapus Langsung) */}
+      <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">
+              Belanja Terbaru ({expenses.length} data)
+            </h3>
+            <p className="text-[10px] text-slate-500 font-medium">Bisa langsung diubah jika ada salah harga atau ketik</p>
+          </div>
+          {expenses.length > 5 && (
+            <button
+              type="button"
+              onClick={() => setActiveTab('history')}
+              className="text-[11px] font-black text-rose-700 hover:underline"
+            >
+              Lihat Semua
+            </button>
+          )}
+        </div>
+
+        {expenses.length > 0 ? (
+          <div className="space-y-2">
+            {[...expenses].reverse().slice(0, 5).map((exp) => (
+              <div
+                key={exp.id}
+                className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-2"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className={`px-2 py-0.5 rounded text-[9px] font-black ${
+                      exp.category === 'MARKET'
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : exp.category === 'ICE'
+                        ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                        : 'bg-amber-100 text-amber-800'
+                    }`}>
+                      {exp.category === 'MARKET' ? '🥬 Pasar' : exp.category === 'ICE' ? '🧊 Bahan Es' : '🔥 Gas/Oper'}
+                    </span>
+                    <span className="font-extrabold text-slate-800 text-xs truncate">
+                      {exp.item_name}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-0.5 font-bold">
+                    {formatDateIndonesian(exp.date, true)}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="font-black text-rose-700 text-xs">
+                    {formatRupiah(exp.amount)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setEditingExpense(exp)}
+                    className="p-1.5 text-slate-600 hover:text-rose-700 bg-white border border-slate-200 hover:bg-rose-50 rounded-lg active:scale-90 transition-all shadow-2xs"
+                    title="Ubah Belanja Ini"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm(`Hapus belanja "${exp.item_name}"?`)) {
+                        onDeleteExpense(exp.id);
+                      }
+                    }}
+                    className="p-1.5 text-slate-400 hover:text-rose-600 active:scale-90"
+                    title="Hapus"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-slate-400 text-center py-4 font-medium">
+            Belum ada catatan belanja.
+          </p>
+        )}
+      </div>
+
       {/* Shortcut ke Menu Riwayat Lengkap */}
       <div 
         onClick={() => setActiveTab('history')}
@@ -309,12 +401,23 @@ export default function ExpensesView({ onSaveExpenses, setActiveTab }) {
             <History className="w-4 h-4 text-rose-700" />
           </div>
           <div>
-            <h4 className="font-extrabold text-xs text-slate-800">Lihat Riwayat & Pencarian Tanggal</h4>
-            <p className="text-[10px] text-slate-500 font-medium">Buka menu riwayat untuk melihat semua catatan belanja lampau</p>
+            <h4 className="font-extrabold text-xs text-slate-800">Cari Riwayat Berdasarkan Tanggal</h4>
+            <p className="text-[10px] text-slate-500 font-medium">Buka menu riwayat untuk melihat & mengubah semua catatan lampau</p>
           </div>
         </div>
         <ChevronRight className="w-4 h-4 text-slate-400" />
       </div>
+
+      {/* Edit Modal */}
+      <EditExpenseModal
+        isOpen={Boolean(editingExpense)}
+        expense={editingExpense}
+        onClose={() => setEditingExpense(null)}
+        onSave={(updated) => {
+          if (onUpdateExpense) onUpdateExpense(updated);
+          setEditingExpense(null);
+        }}
+      />
     </div>
   );
 }

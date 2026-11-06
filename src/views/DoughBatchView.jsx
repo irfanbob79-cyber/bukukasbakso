@@ -9,10 +9,12 @@ import {
   Check,
   Plus,
   Scale,
-  Sparkles
+  Sparkles,
+  Edit3
 } from 'lucide-react';
 import CurrencyInput from '../components/CurrencyInput';
 import IndonesianDatePicker from '../components/IndonesianDatePicker';
+import EditBatchModal from '../components/EditBatchModal';
 import { 
   formatRupiah, 
   getTodayDateString, 
@@ -40,9 +42,16 @@ const PRESET_NAMES = [
 
 const PRESET_UNITS = ['1 kg', '2 kg', '3 kg', '4 kg', '5 kg', '500 gr'];
 
-export default function DoughBatchView({ batches, onSaveBatch, onToggleBatchStatus, onDeleteBatch }) {
+export default function DoughBatchView({ 
+  batches, 
+  onSaveBatch, 
+  onUpdateBatch, 
+  onToggleBatchStatus, 
+  onDeleteBatch 
+}) {
   const [grindDate, setGrindDate] = useState(getTodayDateString());
   const [estimatedDays, setEstimatedDays] = useState(3);
+  const [editingBatch, setEditingBatch] = useState(null);
   
   // Dynamic customizable components with custom name and quantity/unit
   const [items, setItems] = useState([
@@ -421,18 +430,29 @@ export default function DoughBatchView({ batches, onSaveBatch, onToggleBatchStat
 
                   {/* Actions */}
                   <div className="mt-2.5 pt-2 border-t border-slate-200/50 flex items-center justify-between">
-                    <button
-                      type="button"
-                      onClick={() => onToggleBatchStatus(b.id)}
-                      className={`text-xs font-black px-2.5 py-1.5 rounded-xl flex items-center gap-1 active:scale-95 transition-all ${
-                        !b.is_completed
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : 'bg-slate-200 text-slate-700'
-                      }`}
-                    >
-                      <Check className="w-3.5 h-3.5 stroke-[3]" />
-                      <span>{!b.is_completed ? 'Tandai Habis' : 'Aktifkan'}</span>
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setEditingBatch(b)}
+                        className="text-xs font-black px-2.5 py-1.5 bg-white border border-amber-300 text-amber-900 rounded-xl flex items-center gap-1 active:scale-95 transition-all shadow-2xs"
+                      >
+                        <Edit3 className="w-3.5 h-3.5 text-amber-700" />
+                        <span>Ubah Rincian</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => onToggleBatchStatus(b.id)}
+                        className={`text-xs font-black px-2.5 py-1.5 rounded-xl flex items-center gap-1 active:scale-95 transition-all ${
+                          !b.is_completed
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-slate-200 text-slate-700'
+                        }`}
+                      >
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                        <span>{!b.is_completed ? 'Tandai Habis' : 'Aktifkan'}</span>
+                      </button>
+                    </div>
 
                     <button
                       type="button"
@@ -458,6 +478,17 @@ export default function DoughBatchView({ batches, onSaveBatch, onToggleBatchStat
           </p>
         )}
       </div>
+
+      {/* Edit Modal */}
+      <EditBatchModal
+        isOpen={Boolean(editingBatch)}
+        batch={editingBatch}
+        onClose={() => setEditingBatch(null)}
+        onSave={(updated) => {
+          if (onUpdateBatch) onUpdateBatch(updated);
+          setEditingBatch(null);
+        }}
+      />
     </div>
   );
 }

@@ -68,8 +68,15 @@ export default function App() {
 
   // Handlers for Sales
   const handleSaveSale = (saleData) => {
-    const updated = (sales || []).filter((s) => s.date !== saleData.date);
+    const updated = (sales || []).filter((s) => s.date !== saleData.date && s.id !== saleData.id);
     const newSales = [...updated, saleData];
+    setSales(newSales);
+    saveStoredData(STORAGE_KEYS.SALES, newSales);
+  };
+
+  const handleUpdateSale = (updatedSale) => {
+    const filtered = (sales || []).filter((s) => s.id !== updatedSale.id && s.date !== updatedSale.date);
+    const newSales = [...filtered, updatedSale];
     setSales(newSales);
     saveStoredData(STORAGE_KEYS.SALES, newSales);
   };
@@ -87,6 +94,12 @@ export default function App() {
     saveStoredData(STORAGE_KEYS.EXPENSES, updated);
   };
 
+  const handleUpdateExpense = (updatedExpense) => {
+    const updated = (expenses || []).map((e) => e.id === updatedExpense.id ? updatedExpense : e);
+    setExpenses(updated);
+    saveStoredData(STORAGE_KEYS.EXPENSES, updated);
+  };
+
   const handleDeleteExpense = (expenseId) => {
     const updated = (expenses || []).filter((e) => e.id !== expenseId);
     setExpenses(updated);
@@ -96,6 +109,12 @@ export default function App() {
   // Handlers for Dough Batches
   const handleSaveBatch = (newBatch) => {
     const updated = [...(batches || []), newBatch];
+    setBatches(updated);
+    saveStoredData(STORAGE_KEYS.BATCHES, updated);
+  };
+
+  const handleUpdateBatch = (updatedBatch) => {
+    const updated = (batches || []).map((b) => b.id === updatedBatch.id ? updatedBatch : b);
     setBatches(updated);
     saveStoredData(STORAGE_KEYS.BATCHES, updated);
   };
@@ -140,6 +159,7 @@ export default function App() {
             <SalesView
               sales={sales || []}
               onSaveSale={handleSaveSale}
+              onUpdateSale={handleUpdateSale}
               onDeleteSale={handleDeleteSale}
               setActiveTab={setActiveTab}
             />
@@ -149,6 +169,7 @@ export default function App() {
             <ExpensesView
               expenses={expenses || []}
               onSaveExpenses={handleSaveExpenses}
+              onUpdateExpense={handleUpdateExpense}
               onDeleteExpense={handleDeleteExpense}
               setActiveTab={setActiveTab}
             />
@@ -158,6 +179,7 @@ export default function App() {
             <DoughBatchView
               batches={batches || []}
               onSaveBatch={handleSaveBatch}
+              onUpdateBatch={handleUpdateBatch}
               onToggleBatchStatus={handleToggleBatchStatus}
               onDeleteBatch={handleDeleteBatch}
             />
@@ -196,8 +218,11 @@ export default function App() {
               sales={sales || []}
               expenses={expenses || []}
               batches={batches || []}
+              onUpdateSale={handleUpdateSale}
               onDeleteSale={handleDeleteSale}
+              onUpdateExpense={handleUpdateExpense}
               onDeleteExpense={handleDeleteExpense}
+              onUpdateBatch={handleUpdateBatch}
               onDeleteBatch={handleDeleteBatch}
               onToggleBatchStatus={handleToggleBatchStatus}
               setActiveTab={setActiveTab}

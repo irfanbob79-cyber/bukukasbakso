@@ -4,17 +4,20 @@ import {
   Save, 
   Calculator, 
   CheckCircle, 
-  AlertCircle,
-  GlassWater,
-  UtensilsCrossed,
-  History,
-  ChevronRight,
-  Plus,
-  Minus
+  AlertCircle, 
+  GlassWater, 
+  UtensilsCrossed, 
+  History, 
+  ChevronRight, 
+  Plus, 
+  Minus,
+  Edit3,
+  Trash2
 } from 'lucide-react';
 import CurrencyInput from '../components/CurrencyInput';
 import DenominationCalculatorModal from '../components/DenominationCalculatorModal';
 import IndonesianDatePicker from '../components/IndonesianDatePicker';
+import EditSaleModal from '../components/EditSaleModal';
 import { 
   formatRupiah, 
   getTodayDateString, 
@@ -22,9 +25,16 @@ import {
   generateUUID 
 } from '../utils/formatters';
 
-export default function SalesView({ sales, onSaveSale, setActiveTab }) {
+export default function SalesView({ 
+  sales = [], 
+  onSaveSale, 
+  onUpdateSale, 
+  onDeleteSale, 
+  setActiveTab 
+}) {
   const [selectedDate, setSelectedDate] = useState(getTodayDateString());
   const [baksoIncome, setBaksoIncome] = useState(0);
+  const [editingSale, setEditingSale] = useState(null);
   
   // Drink/Ice sales separation
   const [iceCups, setIceCups] = useState(0);
@@ -352,6 +362,82 @@ export default function SalesView({ sales, onSaveSale, setActiveTab }) {
         </button>
       </form>
 
+      {/* Daftar Penjualan Terbaru (Bisa Diubah / Diedit Langsung) */}
+      <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">
+              Penjualan Terbaru ({sales.length} data)
+            </h3>
+            <p className="text-[10px] text-slate-500 font-medium">Bisa langsung diubah jika ada salah hitung atau ketik</p>
+          </div>
+          {sales.length > 5 && (
+            <button
+              type="button"
+              onClick={() => setActiveTab('history')}
+              className="text-[11px] font-black text-emerald-700 hover:underline"
+            >
+              Lihat Semua
+            </button>
+          )}
+        </div>
+
+        {sales.length > 0 ? (
+          <div className="space-y-2">
+            {[...sales].reverse().slice(0, 5).map((s) => (
+              <div
+                key={s.id}
+                className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-2"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="px-2 py-0.5 rounded text-[9px] font-black bg-emerald-100 text-emerald-900 border border-emerald-300">
+                      UANG MASUK
+                    </span>
+                    <span className="font-extrabold text-slate-800 text-xs">
+                      {formatDateIndonesian(s.date, true)}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 mt-0.5 font-medium truncate">
+                    Bakso: {formatRupiah(s.bakso_income ?? s.total_cash_income)} {s.ice_income ? `• Es: ${formatRupiah(s.ice_income)}` : ''}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="font-black text-emerald-700 text-xs">
+                    {formatRupiah(s.total_cash_income)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setEditingSale(s)}
+                    className="p-1.5 text-slate-600 hover:text-emerald-700 bg-white border border-slate-200 hover:bg-emerald-50 rounded-lg active:scale-90 transition-all shadow-2xs"
+                    title="Ubah Penjualan Ini"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm(`Hapus catatan omzet tanggal ${formatDateIndonesian(s.date)}?`)) {
+                        onDeleteSale(s.id);
+                      }
+                    }}
+                    className="p-1.5 text-slate-400 hover:text-rose-600 active:scale-90"
+                    title="Hapus"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-slate-400 text-center py-4 font-medium">
+            Belum ada catatan penjualan harian.
+          </p>
+        )}
+      </div>
+
       {/* Shortcut ke Menu Riwayat Lengkap */}
       <div 
         onClick={() => setActiveTab('history')}
@@ -362,12 +448,23 @@ export default function SalesView({ sales, onSaveSale, setActiveTab }) {
             <History className="w-4 h-4 text-emerald-700" />
           </div>
           <div>
-            <h4 className="font-extrabold text-xs text-slate-800">Lihat Riwayat & Pencarian Tanggal</h4>
-            <p className="text-[10px] text-slate-500 font-medium">Buka menu riwayat untuk melihat semua catatan omzet lampau</p>
+            <h4 className="font-extrabold text-xs text-slate-800">Cari Riwayat Berdasarkan Tanggal</h4>
+            <p className="text-[10px] text-slate-500 font-medium">Buka menu riwayat untuk melihat & mengubah semua catatan lampau</p>
           </div>
         </div>
         <ChevronRight className="w-4 h-4 text-slate-400" />
       </div>
+
+      {/* Edit Sale Modal */}
+      <EditSaleModal
+        isOpen={Boolean(editingSale)}
+        sale={editingSale}
+        onClose={() => setEditingSale(null)}
+        onSave={(updated) => {
+          if (onUpdateSale) onUpdateSale(updated);
+          setEditingSale(null);
+        }}
+      />
 
       {/* Cash Drawer Calculator Modal */}
       <DenominationCalculatorModal
